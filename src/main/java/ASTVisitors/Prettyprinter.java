@@ -2,8 +2,6 @@ package ASTVisitors;
 
 import ASTNodes.*;
 
-import java.sql.SQLOutput;
-
 public class Prettyprinter implements ASTvisitor<Void>{
 
     private int             indent = 0;
@@ -37,7 +35,7 @@ public class Prettyprinter implements ASTvisitor<Void>{
 
         indent++;
 
-        n.attributes.accept(this);
+        //n.attributes.accept(this);
         System.out.println("}");
 
         indent--;
@@ -128,7 +126,9 @@ public class Prettyprinter implements ASTvisitor<Void>{
 
         System.out.println(TAB.repeat(indent) + n.entity);
         indent++;
-        n.entities.accept(this);
+        for (int i = 0; i < n.entities.size(); i++){
+            n.entities.get(i).accept(this);
+        }
         indent--;
 
         return null;
@@ -242,8 +242,8 @@ public class Prettyprinter implements ASTvisitor<Void>{
     @Override
     public Void visit(SizeNode n) {
         System.out.print(TAB.repeat(indent)+ "(");
-        System.out.print(n.left + ", ");
-        System.out.print(n.right + ")");
+        System.out.print(n.firstDigit + ", ");
+        System.out.print(n.secondDigit + ")");
 
 
         return null;

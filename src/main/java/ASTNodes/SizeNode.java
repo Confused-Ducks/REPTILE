@@ -3,12 +3,12 @@ package ASTNodes;
 import ASTVisitors.ASTvisitor;
 
 public class SizeNode implements ASTNode{
-    public int left;
-    public int right;
+    public int firstDigit;
+    public int secondDigit;
 
-    public SizeNode(int left, int right) {
-        this.left = left;
-        this.right = right;
+    public SizeNode(int firstDigit, int secondDigit) {
+        this.firstDigit = firstDigit;
+        this.secondDigit = secondDigit;
     }
 
     @Override

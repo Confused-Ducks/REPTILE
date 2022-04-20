@@ -97,6 +97,8 @@ public class ASTbuilder implements GrammarVisitor<ASTNode> {
 
     @Override
     public ASTNode visitControlStmt(GrammarParser.ControlStmtContext ctx) {
+        //I don't think it makes sense to make temporary variables here. --koji--
+
         if (ctx.placement().size() <= 1 && ctx.bexpr() != null){
             ctx.bexpr().accept(this);
             ctx.placement().get(0).accept(this);
@@ -112,19 +114,25 @@ public class ASTbuilder implements GrammarVisitor<ASTNode> {
 
     @Override
     public ASTNode visitPlayerDcl(GrammarParser.PlayerDclContext ctx) {
+        String player = ctx.Player().getText();
+        List<ASTNode> attributes = new ArrayList<>();
         if (ctx.attr() != null) {
-            return new PlayerDclNode(ctx.Player().getText(), ctx.attr().get(0).accept(this));
+            for (int i = 0; i < ctx.attr().size(); i++){
+                attributes.add(ctx.attr().get(i).accept(this));
+            }
+            return new PlayerDclNode(player, attributes);
         }
-
-        return null;
+        else {
+            return null;
+        }
     }
 
     @Override
     public ASTNode visitAttr(GrammarParser.AttrContext ctx) {
+        int digit = Integer.parseInt(ctx.DIGIT().getText());
         if(ctx.Lives() != null){
-            return new AttrNode(Integer.parseInt(ctx.DIGIT().getText()));
+            return new AttrNode(digit);
         }
-
         return null;
     }
 
@@ -163,28 +171,27 @@ public class ASTbuilder implements GrammarVisitor<ASTNode> {
 
     @Override
     public ASTNode visitSize(GrammarParser.SizeContext ctx) {
-        return new SizeNode(Integer.parseInt(ctx.DIGIT(0).getText()), Integer.parseInt(ctx.DIGIT(1).getText()));
+        int firstDigit = Integer.parseInt(ctx.DIGIT().get(0).getText());
+        int secondDigit = Integer.parseInt(ctx.DIGIT().get(1).getText());
+        return new SizeNode(firstDigit, secondDigit);
     }
 
     @Override
     public ASTNode visitPlacement(GrammarParser.PlacementContext ctx) {
 
-        ASTNode place = null;
-        ASTNode iterativeStmt = null;
-        ASTNode controlStmt = null;
-        ASTNode rspnd = null;
+        PlacementNode placementNode = new PlacementNode();
 
         if (ctx.place() != null) {
-            place = ctx.place().accept(this);
+            placementNode.place = ctx.place().accept(this);
         } else if(ctx.iterativeStmt() != null) {
-            iterativeStmt = ctx.iterativeStmt().accept(this);
+            placementNode.iterativeStmtNode = ctx.iterativeStmt().accept(this);
         } else if (ctx.controlStmt() != null) {
-            controlStmt = ctx.controlStmt().accept(this);
+            placementNode.controlStmt = ctx.controlStmt().accept(this);
         } else if (ctx.rspnd() != null) {
-            rspnd = ctx.rspnd().accept(this);
+            placementNode.respond = ctx.rspnd().accept(this);
         }
 
-        return new PlacementNode(place, iterativeStmt, controlStmt, rspnd);
+        return placementNode;
     }
 
     @Override
@@ -260,38 +267,51 @@ public class ASTbuilder implements GrammarVisitor<ASTNode> {
 
     @Override
     public ASTNode visitEntityDcl(GrammarParser.EntityDclContext ctx) {
+
+        String entities = ctx.Entities().getText();
+        List<ASTNode> entitiesNode = new ArrayList<>();
+
         if (ctx.Entities() != null){
-            return new EntityDclNode(ctx.Entities().getText(), ctx.entities().get(0).accept(this));
+            for (int i = 0; i < ctx.entities().size(); i++){
+                entitiesNode.add(ctx.entities().get(i).accept(this));
+            }
         }
-        return null;
+        return new EntityDclNode(entities, entitiesNode);
     }
 
     @Override
     public ASTNode visitEntities(GrammarParser.EntitiesContext ctx) {
+
+        String name = ctx.ID().getText();
+        ASTNode enemyOrItem = null;
+
         if (ctx.enemy() != null) {
-            return new EntitiesNode(ctx.ID().getText(), ctx.enemy().accept(this));
-        } else if(ctx.item() != null) {
-            return new EntitiesNode(ctx.ID().getText(), ctx.item().accept(this));
+            enemyOrItem = ctx.enemy().accept(this);
+        }
+        else if(ctx.item() != null) {
+            enemyOrItem = ctx.item().accept(this);
         }
 
-        return null;
+        return new EntitiesNode(name, enemyOrItem);
     }
 
     @Override
     public ASTNode visitEnemy(GrammarParser.EnemyContext ctx) {
-        if (ctx.STRING() != null) {
-            return new EnemyNode(ctx.Enemy().getText(), Integer.parseInt(ctx.DIGIT().get(0).getText()),
-                    Integer.parseInt(ctx.DIGIT().get(1).getText()), ctx.STRING().getText());
-        } else if (ctx.STRING() == null) {
-            return new EnemyNode(ctx.Enemy().getText(), Integer.parseInt(ctx.DIGIT().get(0).getText()),
-                    Integer.parseInt(ctx.DIGIT().get(1).getText()));
-        }
+        String enemy = ctx.Enemy().getText();
+        int firstDigit = Integer.parseInt(ctx.DIGIT().get(0).getText());
+        int secondDigit = Integer.parseInt(ctx.DIGIT().get(1).getText());
 
-        return null;
+        if (ctx.STRING() != null) {
+            String enemyName = ctx.STRING().getText();
+            return new EnemyNode(enemy, firstDigit, secondDigit, enemyName);
+        } else {
+            return new EnemyNode(enemy, firstDigit, secondDigit);
+        }
     }
 
     @Override
     public ASTNode visitItem(GrammarParser.ItemContext ctx) {
+
         if (ctx.STRING() != null && ctx.COLON() != null) {
             return new ItemNode(ctx.STRING().getText(), Integer.parseInt(ctx.DIGIT(2).getText()), Integer.parseInt(ctx.DIGIT(3).getText()));
         }
