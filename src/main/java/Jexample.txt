@@ -1,0 +1,16 @@
+@Override
+public ASTNode visitAdditive(BoardParser.AdditiveContext ctx) {
+        if (ctx.PLUS() != null) {
+            return new PlusNode(ctx.getChild(0).accept(this), ctx.getChild(2).accept(this));
+        }
+        else if (ctx.MINUS() != null) {
+            return new MinusNode(ctx.getChild(0).accept(this), ctx.getChild(2).accept(this));
+        }
+        else if (ctx.multiplicative() != null) {
+            return ctx.getChild(0).accept(this);
+        }
+        else {
+            System.out.println("Rule not found for additive");
+            return null;
+        }
+}

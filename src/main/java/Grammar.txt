@@ -1,0 +1,99 @@
+S          ->     Imports begin player { Attrs } levelDesign { Levels } Commands end
+
+Imports    ->     Import Imports
+            |     Import
+
+Import     ->     import <stdfile.bull>
+            |     import "filename.bull"
+            |     lambda
+
+Attrs      ->     Attr Attrs
+            |     Attr
+
+Attr       ->     lives : inum
+            |     lambda
+
+Levels     ->     Level Levels
+            |     Level
+
+Level      ->     name { Config }
+
+Config     ->     size : ( inum , inum ) Plcmnt Stmts
+
+Plcmnt     ->     place { Entities }
+            |     lambda
+
+Entities   ->     Entity Entities
+            |     Entity
+
+Entity     ->     Enemy ( inum , inum ) Location
+            |     Enemy ( inum , inum , string ) Location
+            |     Item ( string , inum : inum ) Location
+            |     Item ( string , inum ) Location
+            |     Wall Location
+            |     Gate ( address )
+            |     lambda
+
+Location   ->     on ( inum , inum )
+
+Stmts      ->     Stmt Stmts
+            |     Stmt
+            |     lambda
+
+Stmt       ->     if ( Bexp ) { Rspnd } else { Rspnd }
+            |     if ( Bexp ) { Rspnd }
+
+Bexp       ->     Loprnd Boprt Roprnd
+            |     Aexps Boprt Aexps
+            |     Aexps Boprt Roprand
+            |     Loprnd Boprt Aexps
+            |     UOprt Roprnd
+
+Aexps      ->     Aexp Aexps
+            |     Aexp
+
+Aexp       ->     ( inum Aoprt inum ) Aexp'
+            |     ( Aexps ) Aexp'
+
+Rspnd      ->     Msg
+            |     Msg Stmt Msg
+            |     Stmt
+
+Msg        ->     print " placeholder "
+
+Loprnd     ->     inum
+            |     type
+
+Roprnd     ->     ( inum , inum )
+            |     inum
+
+Boprt      ->     is
+            |     <=
+            |     >=
+            |     <
+            |     >
+            |     and
+            |     or
+            |     not
+
+UOprt      ->     not
+
+Aoprt      ->     +
+            |     -
+            |     *
+            |     /
+
+Commands   ->     command { Actions }
+            |     lambda
+
+Actions    ->     Action Actions
+            |     Action
+
+Action     ->     move
+            |     take
+            |     attack
+            |     equip
+            |     status
+
+Aexp'      ->     Aoprt inum Aexp'
+            |     lambda

@@ -1,0 +1,59 @@
+import <reptile.rpt>
+begin
+    Player {
+        Lives : 10
+    }
+
+    Entities {
+        weak = Enemy(1, 1, "Weak bob")
+        bob = Enemy(4,1,"Bob")
+        pl = Enemy(3, 2)
+        sword = Item("Sword", 3:9)
+    }
+
+    LevelDesign {
+        level-a (10, 9) {
+            place(Entrance) on (0,0)
+            place(Wall) on (1,1)
+            place(Wall) on (1,2)
+            place(Gate(Finish)) on (9,9)
+
+            for(Tile : Tiles){
+
+                if(Tile is (8,8)) {
+                    Print "sfo"
+                }
+
+                if (Tile.y > 8 and Tile.x % 2 is 0) {
+                    place(weak) on Tile
+                }
+
+                if (Tile is (2,2)) {
+                    place(sword) on Tile
+                }
+            }
+            place(sword.dmg(5:9)) on (2,4)
+        }
+    }
+
+    Command {
+        move
+        take
+    }
+
+    Game(level-a) {
+
+        if(PlayerPosition is Empty) {
+            Print "It Is Lonely Here"
+        }
+
+        if(PlayerPosition is Empty) {
+            if(EnemyStrength <= 3) {
+                Print "A Boss Appeared"
+            } else {
+                Print "buh"
+            }
+        }
+    }
+
+end

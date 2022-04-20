@@ -1,0 +1,193 @@
+grammar Grammar;
+
+s               :       imports* 'begin' 'Player' LBRACE attrs* RBRACE 'Entities' LBRACE entities* RBRACE 'LevelDesign' LBRACE levels* RBRACE commands? 'Game' LPAREN levelName RPAREN LBRACE stmts* RBRACE 'end'
+                ;
+
+imports         :       'import' '<'STRING PERIOD 'bull' '>'
+                |       'import' QUOTES STRING PERIOD 'bull' QUOTES
+                ;
+
+attrs           :       'lives' COLON DIGIT
+                ;
+
+entities        :       entityName ASSIGMENT entityDcl
+                ;
+
+entityName      :       STRING
+                ;
+
+entityDcl       :       'Enemy' LPAREN DIGIT COMMA DIGIT RPAREN
+                |       'Enemy' LPAREN DIGIT COMMA DIGIT COMMA QUOTES STRING* QUOTES RPAREN
+                |       'Item' LPAREN QUOTES STRING QUOTES COMMA DIGIT RPAREN
+                |       'Item' LPAREN QUOTES STRING QUOTES COMMA DIGIT COLON DIGIT RPAREN
+                ;
+
+levelName       :       'level-'STRING
+                ;
+
+levels          :       levelName LPAREN DIGIT COMMA DIGIT RPAREN LBRACE placement* RBRACE
+                ;
+
+placement       :       place
+                |       itarativeStmts
+                |       stmts
+                ;
+
+place           :       'place' LPAREN entityName PERIOD STRING LPAREN DIGIT COLON DIGIT RPAREN RPAREN location
+                |       'place' LPAREN entityName PERIOD STRING LPAREN QUOTES STRING* QUOTES RPAREN RPAREN location
+                |       'place' LPAREN entityFiller RPAREN location
+                ;
+
+entityFiller    :       entityName
+                |       'Wall'
+                |       'Gate' LPAREN levelName RPAREN
+                |       'Gate' LPAREN 'Finish' RPAREN
+                ;
+
+location        :       'on' COORDINATE
+                |       'on' TILE
+                ;
+
+itarativeStmts  :       'for' LPAREN TILE COLON 'tiles' RPAREN LBRACE stmts* RBRACE
+                ;
+
+stmts           :       'if' LPAREN bexp RPAREN LBRACE rspnd* RBRACE
+                |       'if' LPAREN bexp RPAREN LBRACE rspnd* RBRACE 'else' LBRACE rspnd* RBRACE
+                ;
+
+bexp            :       loprnd boprt roprnd
+                |       bexp (boprt | modoprt) bexp
+                |       bexp (boprt | modoprt) roprnd
+                |       loprnd (boprt | modoprt) bexp
+                |       uoprt roprnd
+                ;
+
+loprnd          :       TILE
+                |       PLAYERPOSITION
+                |       tilestate
+                |       TILE PERIOD coordinatexy
+                |       DIGIT
+                ;
+
+roprnd          :       COORDINATE
+                |       DIGIT
+                |       tilestate
+                ;
+
+tilestate       :       'Empty'
+                |       entityName
+                ;
+
+
+rspnd           :       msg
+                |       msg stmts msg
+                |       stmts
+                ;
+
+msg             :       'place' LPAREN entityName PERIOD STRING LPAREN QUOTES STRING* QUOTES RPAREN RPAREN location
+                |       'place' LPAREN entityName PERIOD STRING LPAREN DIGIT COLON DIGIT RPAREN RPAREN location
+                |       'place' LPAREN entityName RPAREN location
+                |       'print' QUOTES STRING* QUOTES
+                ;
+
+boprt           :       '<'
+                |       '>'
+                |       '<='
+                |       '>='
+                |       'is'
+                |       'and'
+                |       'or'
+                |       'not'
+                ;
+
+uoprt           :       'not'
+                ;
+
+moprt           :       '*'
+                |       '/'
+                |       modoprt
+                ;
+
+modoprt         :       '%'
+                ;
+
+aoprt           :       '+'
+                |       '-'
+                ;
+
+commands        :       'command' LBRACE actions* RBRACE
+                ;
+
+actions         :       'move'   // Skal vi tilføje en string for at gøre klar til de selv kan lave actions?
+                |       'take'
+                |       'attack'
+                |       'equip'
+                |       'status'
+                ;
+
+coordinatexy    :       'x'
+                |       'y'
+                ;
+
+aExpr           :       aExpr aoprt term
+                |       term
+                ;
+
+term            :       term moprt factor
+                |       factor
+                ;
+
+factor          :       LPAREN aExpr RPAREN
+                |       DIGIT
+                ;
+
+TILE            :       'tile'
+                ;
+
+PLAYERPOSITION  :       'PlayerPosition'
+                ;
+
+LBRACE          :       '{'
+                ;
+
+RBRACE          :       '}'
+                ;
+
+LPAREN          :       '('
+                ;
+
+RPAREN          :       ')'
+                ;
+
+QUOTES          :       '"'
+                ;
+
+PERIOD          :       '.'
+                ;
+
+COMMA           :       ','
+                ;
+
+ASSIGMENT       :       '='
+                ;
+
+COLON           :       ':'
+                ;
+
+COORDINATE      :       LPAREN DIGIT COMMA DIGIT RPAREN
+                ;
+
+DIGIT           :       [0-9]+
+                ;
+
+STRING          :       [a-zA-Z_0-9][a-zA-Z_0-9]*
+                ;
+
+COMMENT         :       '/*' .*? '*/' -> skip
+                ;
+
+COMMENT_LINE    :       '//' -> skip
+                ;
+
+WS              :       [ \t\r\n] -> channel(HIDDEN)
+                ;
